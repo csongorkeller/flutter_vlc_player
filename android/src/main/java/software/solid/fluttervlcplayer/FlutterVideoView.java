@@ -388,7 +388,7 @@ class FlutterVideoView implements PlatformView, MethodChannel.MethodCallHandler,
             case "changeURL":
                 if (libVLC == null)
                     result.error("VLC_NOT_INITIALIZED", "The player has not yet been initialized.", false);
-
+                Map<String, String> resultMaps = new HashMap<>();
                 boolean isPlaying = mediaPlayer.isPlaying();
                 mediaPlayer.stop();
                 String newURL = methodCall.argument("url");
@@ -397,14 +397,15 @@ class FlutterVideoView implements PlatformView, MethodChannel.MethodCallHandler,
                 isLocalSubtitle = methodCall.argument("isLocalSubtitle");
                 isSubtitleSelected = methodCall.argument("isSubtitleSelected"); */
                 //
-                Media newMedia = new Media(libVLC, getStreamUri(newURL, isLocalMedia));
+                Media newMedia = new Media(libVLC, Uri.parse(Uri.decode(newURL)));
                 mediaPlayer.setMedia(newMedia);
                 if (!subtitle.isEmpty())
                     mediaPlayer.addSlave(Media.Slave.Type.Subtitle, getStreamUri(subtitle, isLocalSubtitle), isSubtitleSelected);
                 newMedia.release();
                 if (isPlaying)
                     mediaPlayer.play();
-                result.success(null);
+                resultMaps.put("aspectRatio", String.valueOf(mediaPlayer.getAspectRatio()));
+                result.success(resultMaps);
                 break;
 
             case "getSnapshot":
